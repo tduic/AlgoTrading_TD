@@ -1,20 +1,12 @@
 import os
 import tdameritrade as td
 import tdameritrade.orders.order_builder as o
-
-# login
-client_id = os.getenv('TDAMERITRADE_CLIENT_ID')
-account_id = os.getenv('TDAMERITRADE_ACCOUNT_ID')
-refresh_token = os.getenv('TDAMERITRADE_REFRESH_TOKEN')
-t = td.TDClient(
-    client_id=client_id,
-    refresh_token=refresh_token,
-    account_ids=[account_id]
-)
+from actions.login import *
+from utils.optionPnl import coveredCall
 
 # get watchlist
-algoListId = os.getenv('TDAMERITRADE_ALGOLIST_ID')
-algoList = t.watchlists(account_id, algoListId)['watchlistItems']
+algolist_id = os.getenv('TDAMERITRADE_ALGOLIST_ID')
+algoList = t.watchlists(account_id, algolist_id)['watchlistItems']
 
 # check how stocks are performing
 volatilities = {}

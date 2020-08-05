@@ -1,0 +1,11 @@
+import os
+import tdameritrade as td
+
+client_id = os.getenv('TDAMERITRADE_CLIENT_ID')
+account_id = os.getenv('TDAMERITRADE_ACCOUNT_ID')
+refresh_token = os.getenv('TDAMERITRADE_REFRESH_TOKEN')
+t = td.TDClient(
+    client_id=client_id,
+    refresh_token=refresh_token,
+    account_ids=[account_id]
+)
