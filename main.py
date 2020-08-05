@@ -1,7 +1,6 @@
 import os
 import tdameritrade as td
 import tdameritrade.orders.order_builder as o
-from Actions.login import login
 
 # login
 client_id = os.getenv('TDAMERITRADE_CLIENT_ID')
@@ -22,6 +21,3 @@ volatilities = {}
 for asset in algoList:
     symbol = asset['instrument']['symbol']
     volatilities[symbol] = t.options(symbol)['volatility']
-
-# print(t.quote('C'))
-print(volatilities)
