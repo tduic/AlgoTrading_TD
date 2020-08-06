@@ -1,6 +1,6 @@
 import time
 from datetime import date, datetime
-import utils.constants
+from utils.constants import *
 
 def cmp(a, b):
     return (a > b) - (a < b)
@@ -25,7 +25,8 @@ def makeOptionSymbolStr(asset, expiry, strike, optionType):
 
 def isLongUnderlying(asset, contracts):
     neededShares = SHARES_PER_CONTRACT * contracts
-    positions = t.accounts('positions')[account_id]['securitiesAccount']['positions']
+    posEnum = t.Account.Fields.POSITIONS
+    positions = t.accounts(ACCOUNT_ID, posEnum).json()['securitiesAccount']['positions']
     for pos in positions:
         if pos['instrument']['symbol'] == asset:
             return pos['longQuantity'] >= neededShares

@@ -1,11 +1,14 @@
 import os
-import tdameritrade as td
+from tda import auth, client
+from utils.constants import *
 
-client_id = os.getenv('TDAMERITRADE_CLIENT_ID')
-account_id = os.getenv('TDAMERITRADE_ACCOUNT_ID')
-refresh_token = os.getenv('TDAMERITRADE_REFRESH_TOKEN')
-t = td.TDClient(
-    client_id=client_id,
-    refresh_token=refresh_token,
-    account_ids=[account_id]
-)
+def Login():
+    try:
+        t = auth.client_from_token_file(TOKEN_PATH, API_KEY)
+    except FileNotFoundError:
+        from selenium import webdriver
+        from webdriver_manager.chrome import ChromeDriverManager
+        with webdriver.Chrome(ChromeDriverManager().install()) as driver:
+            t = auth.client_from_login_flow(
+                driver, API_KEY, REDIRECT_URI, TOKEN_PATH)
+    return t
