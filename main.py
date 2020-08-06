@@ -16,11 +16,11 @@ def main():
         quote = t.get_quote(symbol).json()
         fundamentalEnum = t.Instrument.Projection.FUNDAMENTAL
         fund = t.search_instruments(symbol, fundamentalEnum).json()[symbol]['fundamental']
+        paysDividends = fund['dividendDate'] != ' '
         beta = fund['beta']
         vol10DayAvg = fund['vol10DayAvg']
         historyDays = 90
         hv = historicalVolatility(t, symbol, 90)
-
 
 if __name__ == '__main__':
     main()

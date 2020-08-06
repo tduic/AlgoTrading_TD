@@ -1,6 +1,8 @@
 import time, math
 from datetime import date, datetime, timedelta
 from utils.constants import *
+import numpy as np
+from scipy import stats
 
 def cmp(a, b):
     return (a > b) - (a < b)
@@ -59,5 +61,3 @@ def historicalVolatility(t, symbol, n):
     stdDevAnnualized = stdDev * math.sqrt(252)
 
     return stdDevAnnualized
-
-def impliedVolatility(t, ):
