@@ -3,28 +3,24 @@ from actions.login import Login
 import requests
 from utils.constants import *
 from utils.optionPnl import *
+from utils.helpers import *
 from tda import client
 
-# r = requests.get('https://trade.thinkorswim.com/?symbol=AAPL')
-# print(r.text)
+def main():
+    t = Login()
 
-t = Login()
+    algolist = t.get_watchlist(ACCOUNT_ID, ALGOLIST_ID).json()['watchlistItems']
 
-# t.get_quote('AAPL').json()
-# fund = t.Instrument.Projection.FUNDAMENTAL
+    for asset in algolist:
+        symbol = asset['instrument']['symbol']
+        quote = t.get_quote(symbol).json()
+        fundamentalEnum = t.Instrument.Projection.FUNDAMENTAL
+        fund = t.search_instruments(symbol, fundamentalEnum).json()[symbol]['fundamental']
+        beta = fund['beta']
+        vol10DayAvg = fund['vol10DayAvg']
+        historyDays = 90
+        hv = historicalVolatility(t, symbol, 90)
 
-# print(t.get_quote('AAPL').json()['AAPL'])
-# print(t.search_instruments('AAPL', fund).json()['AAPL']['fundamental'])
 
-# print(client.get_options_chain('AAPL').json())
-
-# print(t.get_option_chain('AAPL').json())
-
-# r = c.get_price_history('AAPL',
-#         period_type=client.Client.PriceHistory.PeriodType.YEAR,
-#         period=client.Client.PriceHistory.Period.TWENTY_YEARS,
-#         frequency_type=client.Client.PriceHistory.FrequencyType.DAILY,
-#         frequency=client.Client.PriceHistory.Frequency.DAILY)
-# assert r.ok, r.raise_for_status()
-# print(json.dumps(r.json(), indent=4))
-print(coveredCall('AAPL', 250, '2020-08-07', 450))
+if __name__ == '__main__':
+    main()

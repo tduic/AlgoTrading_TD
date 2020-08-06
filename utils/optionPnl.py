@@ -2,7 +2,7 @@ from utils.constants import SHARES_PER_CONTRACT, COMMISSION_PER_SHARE
 from utils.helpers import makeOptionDateStr, cmp
 from actions.login import *
 
-def coveredCall(asset, buy, expiry, strike, contracts=1):
+def coveredCall(t, asset, buy, expiry, strike, contracts=1):
     contractAdjustment = SHARES_PER_CONTRACT * contracts
     optionDateStr = makeOptionDateStr(expiry)
     # get list of call options at given expiry and strike
@@ -14,7 +14,7 @@ def coveredCall(asset, buy, expiry, strike, contracts=1):
     maxLoss = breakeven * contractAdjustment
     return (maxGain, maxLoss, breakeven)
 
-def marriedPut(asset, buy, expiry, strike, contracts=1):
+def marriedPut(t, asset, buy, expiry, strike, contracts=1):
     contractAdjustment = SHARES_PER_CONTRACT * contracts
     optionDateStr = makeOptionDateStr(expiry)
     # get list of put options at given expiry and strike
@@ -26,7 +26,7 @@ def marriedPut(asset, buy, expiry, strike, contracts=1):
     maxLoss = (breakeven - strike) * contractAdjustment
     return (currentPnl, maxLoss, breakeven)
 
-def ironCondor(asset, expiry, putBuy, putWrite, callWrite, callBuy, contracts=1):
+def ironCondor(t, asset, expiry, putBuy, putWrite, callWrite, callBuy, contracts=1):
     contractAdjustment = SHARES_PER_CONTRACT * contracts
     optionDateStr = makeOptionDateStr(expiry)
     optionsChain = t.get_option_chain(asset).json()
@@ -50,7 +50,7 @@ def ironCondor(asset, expiry, putBuy, putWrite, callWrite, callBuy, contracts=1)
     maxLoss = {'low': maxLossLow, 'high': maxLossHigh}
     return (maxGain, maxLoss, breakeven)
 
-def strangleBuy(asset, expiry, putBuy, callBuy, contracts=1):
+def strangleBuy(t, asset, expiry, putBuy, callBuy, contracts=1):
     contractAdjustment = SHARES_PER_CONTRACT * contracts
     optionDateStr = makeOptionDateStr(expiry)
     optionsChain = t.get_option_chain(asset).json()
