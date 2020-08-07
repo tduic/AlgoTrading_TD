@@ -11,18 +11,23 @@ def main():
 
     algolist = t.get_watchlist(ACCOUNT_ID, ALGOLIST_ID).json()['watchlistItems']
 
-    for asset in algolist:
-        symbol = asset['instrument']['symbol']
+    ivList, ivpList = impliedVolatility()
+
+    algoAssets = {}
+    for i in range(len(algolist)):
+        asset = {}
+        symbol = algolist[i]['instrument']['symbol']
         quote = t.get_quote(symbol).json()[symbol]
         fundamentalEnum = t.Instrument.Projection.FUNDAMENTAL
         fund = t.search_instruments(symbol, fundamentalEnum).json()[symbol]['fundamental']
-        beta = fund['beta']
-        vol10DayAvg = fund['vol10DayAvg']
-        vol3MonthAvg = fund['vol3MonthAvg']
+        asset['beta'] = fund['beta']
+        asset['vol10DayAvg'] = fund['vol10DayAvg']
+        asset['vol3MonthAvg'] = fund['vol3MonthAvg']
         historyDays = 90
-        hv = historicalVolatility(t, 'AAPL', 90)
-        impliedVolatility()
-        break
+        asset['hv'] = historicalVolatility(t, 'AAPL', 90)
+        asset['iv'] = ivList[i]
+        asset['ivp'] = ivpList[i]
+        algoAssets[symbol] = asset
 
 if __name__ == '__main__':
     main()

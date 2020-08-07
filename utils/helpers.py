@@ -68,10 +68,15 @@ def get_column_count(table):
 
 def impliedVolatility():
     from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
     from webdriver_manager.chrome import ChromeDriverManager
     import pickle
-    with webdriver.Chrome(ChromeDriverManager().install()) as driver:
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--window-size=2560x1600")
+    with webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options) as driver:
         data = pickle.load(open(".login", "rb"))
+
 
         # login to ToS web
         driver.get('https://trade.thinkorswim.com/')
@@ -110,10 +115,15 @@ def impliedVolatility():
         body = driver.find_element_by_id('watchlist-table-body')
         rowCount = get_row_count(body)
         colCount = get_column_count(body)
-        print(rowCount, colCount)
         ivCol = body.find_elements_by_xpath("//tr/td["+str(ivIndex+1)+"]")
-        ivList = []
+        ivpCol = body.find_elements_by_xpath("//tr/td["+str(ivpIndex+1)+"]")
+        ivList, ivpList = [], []
         for elem in ivCol:
-            ivList.append(elem.text)
-        print(ivList)
-        time.sleep(10)
+            text = elem.text
+            if '%' in text:
+                ivList.append(text)
+        for elem in ivpCol:
+            text = elem.text
+            if '%' in text:
+                ivpList.append(text)
+        return ivList, ivpList
