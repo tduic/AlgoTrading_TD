@@ -24,7 +24,7 @@ def main():
         asset['vol10DayAvg'] = fund['vol10DayAvg']
         asset['vol3MonthAvg'] = fund['vol3MonthAvg']
         historyDays = 90
-        asset['hv'] = historicalVolatility(t, 'AAPL', 90)
+        asset['hv'] = historicalVolatility(t, symbol, historyDays)
         asset['iv'] = ivList[i]
         asset['ivp'] = ivpList[i]
         algoAssets[symbol] = asset
