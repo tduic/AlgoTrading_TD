@@ -77,7 +77,6 @@ def impliedVolatility():
     with webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options) as driver:
         data = pickle.load(open(".login", "rb"))
 
-
         # login to ToS web
         driver.get('https://trade.thinkorswim.com/')
         driver.find_element_by_id('username0').send_keys(data['username'])
@@ -93,8 +92,7 @@ def impliedVolatility():
         driver.find_element_by_id('accept').click()
 
         # switch watchlist to AlgoList and add IV Percentile
-        watchlist = driver.find_element_by_css_selector('.watchlist-description')
-        watchlist.click()
+        driver.find_element_by_css_selector('.watchlist-description').click()
         driver.find_element_by_css_selector('[aria-label=AlgoList').click()
         driver.find_element_by_css_selector('[aria-label="Column Configuration Collapsed"]').click()
         driver.find_element_by_css_selector('[data-rbd-draggable-id="watchlist-table-table-column-drawer-IV Percentile"]').click()
@@ -126,4 +124,5 @@ def impliedVolatility():
             text = elem.text
             if '%' in text:
                 ivpList.append(text)
+
         return ivList, ivpList
