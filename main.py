@@ -1,16 +1,14 @@
 import os
+from actions.executeOrder import *
 from actions.login import Login
-import requests
 from utils.constants import *
-from utils.optionPnl import *
 from utils.helpers import *
+from utils.optionPnl import *
 from tda import client
+from tda.orders.options import *
 
-def main():
-    t = Login()
-
+def setAssets(t):
     algolist = t.get_watchlist(ACCOUNT_ID, ALGOLIST_ID).json()['watchlistItems']
-
     ivList, ivpList = impliedVolatility()
 
     algoAssets = {}
@@ -28,6 +26,17 @@ def main():
         asset['iv'] = ivList[i]
         asset['ivp'] = ivpList[i]
         algoAssets[symbol] = asset
+    return algoAssets
+
+def main():
+    t = Login()
+    # algoAssets = setAssets(t)
+
+    # doLogic(algoAssets)
+
+    symbol = OptionSymbol(symbol, expiry, putCall, strike)
+    option = option_buy_to_open_limit(symbol, quantity, price)
+    # order = place_order(t, ACCOUNT_ID, option)
 
 if __name__ == '__main__':
     main()
