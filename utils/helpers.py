@@ -5,6 +5,19 @@ from utils.constants import *
 def cmp(a, b):
     return (a > b) - (a < b)
 
+def readFile(path, type):
+    # rt / rb (read text/bytes)
+    with open(path, type) as f:
+        content = f.read()
+    return content
+
+def writeFile(path, type, content):
+    # wt / wb (write text/bytes)
+    # at / wb (append text/bytes)
+    with open(path, type) as f:
+        f.write(content + '\n')
+    return None
+
 def getDaysToExpiry(expiry):
     # number of days to given expiry from today
     today = date.today()
@@ -119,10 +132,27 @@ def impliedVolatility():
         for elem in ivCol:
             text = elem.text
             if '%' in text:
-                ivList.append(text)
+                ivList.append(text[:-1])
         for elem in ivpCol:
             text = elem.text
             if '%' in text:
-                ivpList.append(text)
+                ivpList.append(text[:-1])
 
         return ivList, ivpList
+
+def viableOptions(price, calls, puts, strikeRange):
+    minStrike = price - strikeRange
+    maxStrike = price + strikeRange
+    viables = []
+    for strike, calls in calls.items():
+        if minStrike < float(strike) and float(strike) < maxStrike:
+            call = calls[0]
+            if float(call['delta']) > -5 * float(call['theta']) and float(call['volatility']) < 20:
+                if puts[strike]:
+                    put = puts[strike][0]
+                    if float(put['delta']) > 5 * float(put['theta']) and float(put['volatility']) < 20:
+                        viables.append((call, put))
+    return viables
+
+def stopLoss(t):
+    orders = t.get_orders(ACCOUNT_ID, WORKING)
