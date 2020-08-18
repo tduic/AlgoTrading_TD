@@ -36,8 +36,8 @@ def straddleLogic(t, assets):
     for symbol, asset in assets.items():
         if asset['hv'] > .5 and asset['ivp'] < 45:
             strikeRange = getRange(asset)
-            calls = t.get_option_chain(symbol).json()['callExpDateMap']['2020-08-21:7']
-            puts = t.get_option_chain(symbol).json()['putExpDateMap']['2020-08-21:7']
+            calls = t.get_option_chain(symbol).json()['callExpDateMap']['2020-08-21:3']
+            puts = t.get_option_chain(symbol).json()['putExpDateMap']['2020-08-21:3']
             viables = viableOptions(asset['price'], calls, puts, strikeRange)
     return viables
 
@@ -45,11 +45,10 @@ def main():
     t = Login()
     algoAssets = setAssets(t)
     straddles = straddleLogic(t, algoAssets)
-
+    print(straddles)
     # symbol = OptionSymbol(symbol, expiry, putCall, strike)
     # option = option_buy_to_open_limit(symbol, quantity, price)
     # order = place_order(t, ACCOUNT_ID, option)
 
 if __name__ == '__main__':
     main()
-
