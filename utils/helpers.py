@@ -92,6 +92,7 @@ def impliedVolatility():
 
         # login to ToS web
         driver.get('https://trade.thinkorswim.com/')
+        time.sleep(5)
         driver.find_element_by_id('username0').send_keys(data['username'])
         driver.find_element_by_id('password').send_keys(data['password'])
         driver.find_element_by_id('accept').click()
@@ -104,11 +105,12 @@ def impliedVolatility():
         driver.find_element_by_css_selector('[for=trustthisdevice0_0]').click()
         driver.find_element_by_id('accept').click()
 
-        # switch watchlist to AlgoList and add IV Percentile
+        # switch watchlist to AlgoList, expand it, and add IV Percentile
         driver.find_element_by_css_selector('.watchlist-description').click()
-        driver.find_element_by_css_selector('[aria-label=AlgoList').click()
-        driver.find_element_by_css_selector('[aria-label="Column Configuration Collapsed"]').click()
-        driver.find_element_by_css_selector('[data-rbd-draggable-id="watchlist-table-table-column-drawer-IV Percentile"]').click()
+        driver.find_element_by_css_selector('[aria-label="AlgoList"]').click()
+        driver.find_element_by_css_selector('[aria-label="Expand Watchlist"]').click()
+        driver.find_element_by_css_selector('.column-drawer-arrow-btn').click()
+        driver.find_element_by_css_selector('[data-rbd-drag-handle-draggable-id="watchlist-table-table-column-drawer-IV Percentile"]').click()
         driver.find_element_by_css_selector('[aria-label="Column Configuration Expanded"]').click()
 
         # obtain IV and IV Percentile indices
@@ -129,14 +131,13 @@ def impliedVolatility():
         ivCol = body.find_elements_by_xpath("//tr/td["+str(ivIndex+1)+"]")
         ivpCol = body.find_elements_by_xpath("//tr/td["+str(ivpIndex+1)+"]")
         ivList, ivpList = [], []
-        for elem in ivCol:
-            text = elem.text
-            if '%' in text:
-                ivList.append(text[:-1])
-        for elem in ivpCol:
-            text = elem.text
-            if '%' in text:
-                ivpList.append(text[:-1])
+        for i in range(rowCount):
+            ivTextTmp = ivCol[i].text
+            ivpTextTmp = ivpCol[i].text
+            ivText = ivTextTmp[:-1] if '%' in ivTextTmp else ivTextTmp
+            ivpText = ivpTextTmp[:-1] if '%' in ivpTextTmp else ivpTextTmp
+            ivList.append(ivText)
+            ivpList.append(ivpText)
 
         return ivList, ivpList
 
