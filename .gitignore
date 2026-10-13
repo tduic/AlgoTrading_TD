@@ -2,3 +2,8 @@
 REDACTED
 .login
 data/**
+__pycache__/
+*.pyc
+.DS_Store
+.token*
+*.token
