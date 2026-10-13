@@ -30,15 +30,18 @@ class FakeTD:
         PeriodType=types.SimpleNamespace(MONTH="month"),
         FrequencyType=types.SimpleNamespace(DAILY="daily"),
         Frequency=types.SimpleNamespace(DAILY=1))
+    # tda-api: Client.Order.Status is an Enum whose values are the API strings.
+    Order = types.SimpleNamespace(Status=types.SimpleNamespace(WORKING="WORKING"))
 
     def __init__(self, chains=None, quotes=None, fundamentals=None, positions=None,
-                 candles=None, watchlist=None):
+                 candles=None, watchlist=None, orders=None):
         self.chains = chains or {}
         self.quotes = quotes or {}
         self.fundamentals = fundamentals or {}
         self.positions = positions or []
         self.candles = candles or {}
         self.watchlist = watchlist or []
+        self.orders = orders or []
         self.calls = []
 
     def get_option_chain(self, symbol):
@@ -60,6 +63,10 @@ class FakeTD:
     def get_price_history(self, symbol, **kwargs):
         self.calls.append(("history", symbol, kwargs))
         return Resp({"candles": [{"close": c} for c in self.candles[symbol]]})
+
+    def get_orders_by_path(self, account_id, *, status=None, **kwargs):
+        self.calls.append(("orders", account_id, status))
+        return Resp(self.orders)
 
     def get_watchlist(self, account_id, watchlist_id):
         self.calls.append(("watchlist", account_id, watchlist_id))

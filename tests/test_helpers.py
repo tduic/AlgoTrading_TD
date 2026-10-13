@@ -97,13 +97,13 @@ def test_viable_options_screen():
     assert helpers.viableOptions(100.0, calls, puts, 3.0) == []
 
 
-@pytest.mark.xfail(strict=True, raises=NameError,
-                   reason="BUG: stopLoss() references an undefined WORKING constant")
-def test_stop_loss_is_unfinished():
-    class WithOrders(FakeTD):
-        def get_orders(self, account_id, status):
-            return []
-    helpers.stopLoss(WithOrders())
+def test_stop_loss_fetches_working_orders():
+    # Regression: stopLoss() used an undefined WORKING name and always raised
+    # NameError. It must ask tda-api for the account's WORKING orders.
+    working = [{"orderId": 1, "status": "WORKING"}]
+    t = FakeTD(orders=working)
+    assert helpers.stopLoss(t) == working
+    assert t.calls == [("orders", constants.ACCOUNT_ID, "WORKING")]
 
 
 def test_implied_volatility_scrape(tmp_path, monkeypatch):
@@ -144,3 +144,17 @@ def test_implied_volatility_scrape(tmp_path, monkeypatch):
     assert seen == {"path": "/fake/chromedriver",
                     "opts": ["--headless", "--window-size=2560x1600"]}
     assert ("keys", "u") in log and ("keys", "p") in log and ("keys", "rex") in log
+
+
+def test_constants_import_without_client_id(monkeypatch):
+    # Regression: importing utils.constants raised TypeError (None + str) when
+    # TDAMERITRADE_CLIENT_ID was unset; now API_KEY is None until it is needed.
+    import importlib
+    monkeypatch.delenv("TDAMERITRADE_CLIENT_ID")
+    try:
+        fresh = importlib.reload(constants)
+        assert fresh.API_KEY is None
+    finally:
+        monkeypatch.undo()
+        importlib.reload(constants)
+    assert constants.API_KEY == "TESTCLIENT@AMER.OAUTHAP"

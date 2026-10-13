@@ -156,4 +156,7 @@ def viableOptions(price, calls, puts, strikeRange):
     return viables
 
 def stopLoss(t):
-    orders = t.get_orders(ACCOUNT_ID, WORKING)
+    # tda-api: open orders come from get_orders_by_path, filtered by the
+    # Client.Order.Status enum (same pattern as t.Account.Fields above)
+    orders = t.get_orders_by_path(ACCOUNT_ID, status=t.Order.Status.WORKING).json()
+    return orders

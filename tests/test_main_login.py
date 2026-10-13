@@ -77,11 +77,32 @@ def test_straddle_logic_screens_qualifying_asset(monkeypatch):
     assert got == [(calls["100.0"][0], puts["100.0"][0])]    # 130 is out of range
 
 
-@pytest.mark.xfail(strict=True, raises=UnboundLocalError,
-                   reason="BUG: straddleLogic returns `viables` before assignment "
-                          "when no asset passes the hv/ivp screen")
 def test_straddle_logic_with_no_qualifying_assets():
-    assert main.straddleLogic(FakeTD(), {"X": {"hv": 0.1, "ivp": 90.0}}) == []
+    # Regression: used to raise UnboundLocalError (`viables` never assigned).
+    t = FakeTD()
+    assert main.straddleLogic(t, {"X": {"hv": 0.1, "ivp": 90.0}}) == []
+    assert main.straddleLogic(t, {}) == []
+    assert t.calls == []
+
+
+def test_straddle_logic_returns_pairs_for_every_qualifying_asset():
+    # Regression: only the last qualifying asset's pairs were returned.
+    key = "2020-08-21:3"
+
+    def chain_for(sym, strike):
+        c = [{"symbol": sym + "_C", "delta": 0.5, "theta": -0.05, "volatility": 15}]
+        p = [{"symbol": sym + "_P", "delta": -0.2, "theta": -0.05, "volatility": 15}]
+        return {"callExpDateMap": {key: {strike: c}}, "putExpDateMap": {key: {strike: p}}}
+    t = FakeTD(chains={"AAPL": chain_for("AAPL", "100.0"),
+                       "MSFT": chain_for("MSFT", "50.0")})
+    assets = {"AAPL": {"price": 100.0, "iv": 40.0, "hv": 0.6, "ivp": 30.0},
+              "SKIP": {"price": 10.0, "iv": 40.0, "hv": 0.1, "ivp": 30.0},
+              "MSFT": {"price": 50.0, "iv": 40.0, "hv": 0.7, "ivp": 10.0}}
+    got = main.straddleLogic(t, assets)
+    assert [(c["symbol"], p["symbol"]) for c, p in got] == [("AAPL_C", "AAPL_P"),
+                                                          ("MSFT_C", "MSFT_P")]
+    # one option-chain request per qualifying asset (was two)
+    assert t.calls == [("chain", "AAPL"), ("chain", "MSFT")]
 
 
 def test_main_wires_login_scan_and_screen(monkeypatch, capsys):
@@ -91,3 +112,11 @@ def test_main_wires_login_scan_and_screen(monkeypatch, capsys):
     monkeypatch.setattr(main, "straddleLogic", lambda client, assets: [("call", "put")])
     main.main()
     assert capsys.readouterr().out.strip() == "[('call', 'put')]"
+
+
+def test_login_without_client_id_raises_clear_error(monkeypatch):
+    monkeypatch.setattr(login, "API_KEY", None)
+    monkeypatch.setattr(sys.modules["tda.auth"], "client_from_token_file",
+                        lambda *a: pytest.fail("must not reach tda without a key"))
+    with pytest.raises(RuntimeError, match="TDAMERITRADE_CLIENT_ID"):
+        login.Login()

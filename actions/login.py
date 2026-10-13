@@ -3,6 +3,10 @@ from tda import auth, client
 from utils.constants import *
 
 def Login():
+    if API_KEY is None:
+        raise RuntimeError(
+            'TDAMERITRADE_CLIENT_ID is not set; export your TD Ameritrade app '
+            'client ID before logging in')
     try:
         t = auth.client_from_token_file(TOKEN_PATH, API_KEY)
     except FileNotFoundError:

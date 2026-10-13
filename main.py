@@ -33,12 +33,15 @@ def getRange(asset):
     return asset['price'] * asset['iv']/100 * math.sqrt(8 / 365)
 
 def straddleLogic(t, assets):
+    # viable (call, put) pairs across every asset that passes the hv/ivp screen
+    viables = []
     for symbol, asset in assets.items():
         if asset['hv'] > .5 and asset['ivp'] < 45:
             strikeRange = getRange(asset)
-            calls = t.get_option_chain(symbol).json()['callExpDateMap']['2020-08-21:3']
-            puts = t.get_option_chain(symbol).json()['putExpDateMap']['2020-08-21:3']
-            viables = viableOptions(asset['price'], calls, puts, strikeRange)
+            chain = t.get_option_chain(symbol).json()
+            calls = chain['callExpDateMap']['2020-08-21:3']
+            puts = chain['putExpDateMap']['2020-08-21:3']
+            viables.extend(viableOptions(asset['price'], calls, puts, strikeRange))
     return viables
 
 def main():
